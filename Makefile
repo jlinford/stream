@@ -43,6 +43,18 @@ RUN = $(HUGETLBFS) $(OMP_ENV) $(NUMACTL)
 
 else
 #----------------------------------------------------------------------------
+ifeq (nvidia,$(COMPILER))
+CC = nvc
+CFLAGS = -O3 -fast -mp -Minfo
+LD = $(CC)
+LDFLAGS = $(CFLAGS)
+#HUGETLBFS = LD_PRELOAD=libhugetlbfs.so HUGETLB_MORECORE=2M HUGETLB_VERBOSE=99
+OMP_ENV = OMP_NUM_THREADS=64 OMP_PROC_BIND=close
+#NUMACTL = numactl -C 0-80 -l
+RUN = $(HUGETLBFS) $(OMP_ENV) $(NUMACTL)
+
+else
+#----------------------------------------------------------------------------
 ifeq (fujitsu,$(COMPILER))
 CC = fcc
 CFLAGS = -Kfast,preex -Kopenmp -Kzfill -Kstriping=4
@@ -64,6 +76,7 @@ RUN = $(FJ_ENV) $(OMP_ENV) $(NUMACTL)
 else
 #----------------------------------------------------------------------------
 $(error Invalid parameter: COMPILER=$(COMPILER))
+endif
 endif
 endif
 endif
